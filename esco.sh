@@ -26,12 +26,12 @@ optional1=$(sed -n $((first_str+11))"p" $fhome"sett.conf" | tr -d '\r')
 first5_str=$((first_str+13))
 
 logger "init sec4="$sec4
-logger "init max_time_elk="$max_time_elk
 logger "init first5_str="$first5_str
 
-str_col3=$(grep -cv "^---" $fhome"sett.conf")
+str_col3=$(grep -c '' $fhome"sett.conf")
+logger "init str_col3="$str_col3
 if [ "$str_col3" -gt "$((first5_str+3))" ]; then
-	all5=$(((str_col3-first5_str)/5))
+	all5=$((((str_col3-first5_str)/6)+1))
 	#str_col3=$(grep -cv "^---" "./sett.conf"); echo $str_col3; echo $(((str_col3-11)/5))
 else
 	all5=0
@@ -137,7 +137,7 @@ count=0
 
 for (( i2=0;i2<$all5;i2++)); do
 	logger "watcher -----i2="$i2"----->"
-	
+	wn=0
 	next_five2;
 	count=$(eval $fhome$i2".sh")
 	if [[ $count =~ ^[0-9]+$ ]]; then
@@ -145,12 +145,13 @@ for (( i2=0;i2<$all5;i2++)); do
 		zapushgateway;
 		echo 0 > $fhome$i2".txt"
 	else
-		logger "watcher ERROR count="$count" wn="$wn 
+		logger "watcher ERROR count="$count
 		if [ "$optional1" -gt "0" ]; then
 			[ -f $fhome$i2".txt" ] && wn=$(sed -n 1"p" $fhome$i2".txt" | tr -d '\r')
 			wn=$((wn+1))
 			[ "$wn" -ge "$optional1" ] && count=-1 && zapushgateway && wn=0
 			echo $wn > $fhome$i2".txt"
+			logger "watcher wn="$wn
 		fi
 	fi
 done
